@@ -6,7 +6,7 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-
+var mongoose= require("mongoose")
 var app = express();
 
 // view engine setup
@@ -18,6 +18,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+mongoose.connect("mongodb+srv://arjunarunachalan:B6CzXFeWm0HZV8Pm@cluster0.3n07hem.mongodb.net/sigi?retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log("Connected to the database successfully");
+  })
+  .catch((err) => {
+    console.log("Unable to connect to the database. Error:", err);
+  });
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
