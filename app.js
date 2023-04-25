@@ -3,9 +3,8 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var userRouter=require('./routes/user')
+var adminRouter=require('./routes/admin')
 var mongoose= require("mongoose")
 var app = express();
 
@@ -27,8 +26,8 @@ mongoose.connect("mongodb+srv://arjunarunachalan:B6CzXFeWm0HZV8Pm@cluster0.3n07h
     console.log("Unable to connect to the database. Error:", err);
   });
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/', userRouter);
+app.use('/admin', adminRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
