@@ -5,12 +5,11 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var userRouter=require('./routes/user')
 var adminRouter=require('./routes/admin')
-var mongoose= require("mongoose")
+var mongoose = require("mongoose")
 var app = express();
+const dotenv =  require("dotenv")
+dotenv.config();
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -18,7 +17,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-mongoose.connect("mongodb+srv://arjunarunachalan:B6CzXFeWm0HZV8Pm@cluster0.3n07hem.mongodb.net/sigi?retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log("Connected to the database successfully");
   })
