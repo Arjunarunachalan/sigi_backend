@@ -90,7 +90,7 @@ async function (req, res, next) {
 )
 
 
-router.post('/addproduct', 
+router.post('/product/list', 
 body("name").not().isEmpty().withMessage("Name is required"),
 body("price")
   .not()
@@ -99,9 +99,10 @@ body("price")
   body("description")
   .not()
   .isEmpty()
-  .withMessage("description is require"),
+  .withMessage("description is required"),
 
 async function (req, res, next) {
+
   const { errors } = validationResult(req);
     if (errors.length>0) {
       return res.status(400).json({ errors}) ;
@@ -121,6 +122,42 @@ async function (req, res, next) {
       });
 });
 
+router.get('/product/list',async(req,res,next)=>{
+ //display all product
+   Product.find()
+   .then((response)=>{
+     return res.status(200).json({message:"successfully fetched",data:response})
+   })
+   .catch((err)=>{
+     console.log(err)
+   })
+ })
+router.get('/product/list/:id',async(req,res,next)=>{
+  let proId=req.params.id
+   Product.findById(proId)
+   .then((response)=>{
+     return res.status(200).json({message:"successfully fetched",data:response})
+   })
+   .catch((err)=>{
+     console.log(err)
+   })
+ })
 
+router.put('/product/list/:id',async(req,res,next)=>{
+ 
+
+ let proId=req.params.id
+  Product.findByIdAndUpdate(proId, req.body)
+  .then((response)=>{
+    console.log(response)
+    return res.status(200).json({message:"product updated successfully"})
+  }
+  
+  ).catch((err)=>{
+    console.log(err)
+  })
+  
+}
+ )
 
 module.exports = router;
