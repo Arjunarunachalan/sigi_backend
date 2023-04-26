@@ -10,10 +10,12 @@ const userSchema = new Schema({
     addressLine2:String,
     city:String,
     state:String,
-    email:String,
-    phone:String,
+    email:{ type: String, unique: true,required:true },
+    password:String,
+    phone:Number,
     links:[String],
-    type: { type:String, enum:["shop","customer"], required:true, default:"customer"}
+    type: { type:String, enum:["shop","customer"], required:true, default:"customer"},
+    token: { type: String }
 });
 
 
