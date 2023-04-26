@@ -2,7 +2,8 @@ var express = require('express');
 var router = express.Router();
 const { body, validationResult } = require('express-validator');
 var User = require('../model/User')
-var bcrypt = require('bcrypt')
+var bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 
 router.post('/signup', 
@@ -46,6 +47,45 @@ async function (req, res, next) {
           .json({ message: `Internal server error ${error}` });
       });
 });
+
+router.post('/login',body("email").not().isEmpty().withMessage("Email is required")
+.isEmail().withMessage("Check your email address"),body("password").not().isEmpty().withMessage("Password is required"),
+async function (req, res, next) {
+  const { errors } = validationResult(req);
+    if (errors.length>0) {
+      return res.status(400).json({ errors}) ;
+    }
+  
+  const {email,password} = req.body;
+  
+    const user = await User.findOne({ email: email});
+    
+    if (user) {
+      
+      bcrypt.compare(password,user.password).then((response)=>{
+       
+        if(response){
+          const token = jwt.sign(
+            {user} ,
+            process.env.JWT_TOKEN,
+            {
+              expiresIn: "2h",
+            }
+          );
+
+          return res.status(200).json({ token,message: `${email} logged in succussfully` });
+        }
+      }).catch((err)=>{
+        console.log(err
+          )
+        return res.status(403).json({message:"invalid password"})
+      })
+      
+    }else{
+      return res.status(400).json({message:"user doesn't exists"})
+    }
+  }
+)
 
 
 
