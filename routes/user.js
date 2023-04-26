@@ -90,7 +90,7 @@ async function (req, res, next) {
 )
 
 
-router.post('/addproduct', 
+router.post('/product/list', 
 body("name").not().isEmpty().withMessage("Name is required"),
 body("price")
   .not()
@@ -122,7 +122,17 @@ async function (req, res, next) {
       });
 });
 
-router.get('/product/:id',async(req,res,next)=>{
+router.get('/product/list',async(req,res,next)=>{
+ //display all product
+   Product.find()
+   .then((response)=>{
+     return res.status(200).json({message:"successfully fetched",data:response})
+   })
+   .catch((err)=>{
+     console.log(err)
+   })
+ })
+router.get('/product/list/:id',async(req,res,next)=>{
   let proId=req.params.id
    Product.findById(proId)
    .then((response)=>{
@@ -132,15 +142,15 @@ router.get('/product/:id',async(req,res,next)=>{
      console.log(err)
    })
  })
- 
-router.put('/editproduct/:id',async(req,res,next)=>{
+
+router.put('/product/list/:id',async(req,res,next)=>{
  
 
  let proId=req.params.id
   Product.findByIdAndUpdate(proId, req.body)
   .then((response)=>{
     console.log(response)
-    return res.status(200).json({message:"updated"})
+    return res.status(200).json({message:"product updated successfully"})
   }
   
   ).catch((err)=>{
