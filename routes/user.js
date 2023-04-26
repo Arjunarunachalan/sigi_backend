@@ -2,7 +2,9 @@ var express = require('express');
 var router = express.Router();
 const { body, validationResult } = require('express-validator');
 var User = require('../model/User')
+var Product = require('../model/Products')
 var bcrypt = require('bcrypt')
+
 
 
 router.post('/signup', 
@@ -46,6 +48,38 @@ async function (req, res, next) {
           .json({ message: `Internal server error ${error}` });
       });
 });
+
+router.post('/addproduct', 
+body("name").not().isEmpty().withMessage("Name is required"),
+body("price")
+  .not()
+  .isEmpty()
+  .withMessage("Price is required"),
+  body("description")
+  .not()
+  .isEmpty()
+  .withMessage("description is require"),
+
+async function (req, res, next) {
+  const { errors } = validationResult(req);
+    if (errors.length>0) {
+      return res.status(400).json({ errors}) ;
+    }
+    let productData={...req.body}
+    let newProduct = new Product({ ...productData});
+    newProduct
+      .save()
+      .then((response) => {
+        const { name } = response;
+        return res.status(200).json({ message: `Product ${name} successfully Added` });
+      })
+      .catch((error) => {
+        return res
+          .status(500)
+          .json({ message: `Internal server error ${error}` });
+      });
+});
+
 
 
 
