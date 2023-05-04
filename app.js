@@ -3,8 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var userRouter=require('./routes/user')
-var adminRouter=require('./routes/admin')
+var routes =require('./routes')
 var mongoose = require("mongoose")
 var app = express();
 const dotenv =  require("dotenv")
@@ -25,8 +24,7 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     console.log("Unable to connect to the database. Error:", err);
   });
 
-app.use('/', userRouter);
-app.use('/admin', adminRouter);
+app.use('/', routes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

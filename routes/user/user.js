@@ -1,10 +1,9 @@
 var express = require('express');
 var router = express.Router();
 const { body, validationResult } = require('express-validator');
-var User = require('../model/User')
+var User = require('../../model/User')
 var bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-var Product = require('../model/Products')
 
 
 
@@ -50,8 +49,10 @@ async function (req, res, next) {
       });
 });
 
-router.post('/login',body("email").not().isEmpty().withMessage("Email is required")
-.isEmail().withMessage("Check your email address"),body("password").not().isEmpty().withMessage("Password is required"),
+router.post('/login',
+body("email").not().isEmpty().withMessage("Email is required")
+.isEmail().withMessage("Check your email address"),
+body("password").not().isEmpty().withMessage("Password is required"),
 async function (req, res, next) {
   const { errors } = validationResult(req);
     if (errors.length>0) {
@@ -63,7 +64,7 @@ async function (req, res, next) {
     const user = await User.findOne({ email: email});
     
     if (user) {
-      
+      console.log(user,password);
       bcrypt.compare(password,user.password).then((response)=>{
        
         if(response){
@@ -90,74 +91,30 @@ async function (req, res, next) {
 )
 
 
-router.post('/product/list', 
-body("name").not().isEmpty().withMessage("Name is required"),
-body("price")
-  .not()
-  .isEmpty()
-  .withMessage("Price is required"),
-  body("description")
-  .not()
-  .isEmpty()
-  .withMessage("description is required"),
 
-async function (req, res, next) {
 
-  const { errors } = validationResult(req);
+//  Change Password
+router.post('/change-password',
+body("oldPassword").not().isEmpty().withMessage("Old password is required").isLength({ min: 6, max: 12 }),
+body("newPassword").not().isEmpty().withMessage("New password is required").isLength({ min: 6, max: 12 }),
+body("confirmPassword").not().isEmpty().withMessage("Confirm password is required").isLength({ min: 6, max: 12 })
+,async(req,res,next)=>{
+
+    // express validator response
+    const { errors } = validationResult(req);
     if (errors.length>0) {
       return res.status(400).json({ errors}) ;
     }
-    let productData={...req.body}
-    let newProduct = new Product({ ...productData});
-    newProduct
-      .save()
-      .then((response) => {
-        const { name } = response;
-        return res.status(200).json({ message: `Product ${name} successfully Added` });
-      })
-      .catch((error) => {
-        return res
-          .status(500)
-          .json({ message: `Internal server error ${error}` });
-      });
-});
+    // express validator response
 
-router.get('/product/list',async(req,res,next)=>{
- //display all product
-   Product.find()
-   .then((response)=>{
-     return res.status(200).json({message:"successfully fetched",data:response})
-   })
-   .catch((err)=>{
-     console.log(err)
-   })
- })
-router.get('/product/list/:id',async(req,res,next)=>{
-  let proId=req.params.id
-   Product.findById(proId)
-   .then((response)=>{
-     return res.status(200).json({message:"successfully fetched",data:response})
-   })
-   .catch((err)=>{
-     console.log(err)
-   })
- })
+    const { oldPassword } = req.body
+    const { authorization } = req.headers
+    let token = authorization.split(" ")[1]
+    let docode = jwt.verify(token, process.env.JWT_TOKEN);
+    console.log(docode);
 
-router.put('/product/list/:id',async(req,res,next)=>{
- 
+})
+//  Change Password
 
- let proId=req.params.id
-  Product.findByIdAndUpdate(proId, req.body)
-  .then((response)=>{
-    console.log(response)
-    return res.status(200).json({message:"product updated successfully"})
-  }
-  
-  ).catch((err)=>{
-    console.log(err)
-  })
-  
-}
- )
 
 module.exports = router;
