@@ -5,13 +5,14 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema({
     name:{ type:String, required:true },
-    pin:Number,
+    email:String,
+    phone:String,
     addressLine1:String,
     addressLine2:String,
     city:String,
     state:String,
-    email:String,
-    phone:String,
+    pin:Number,
+    
     links:[String],
     type: { type:String, enum:["shop","customer"], required:true, default:"customer"}
 });

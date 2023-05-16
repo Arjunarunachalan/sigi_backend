@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 const { body, validationResult } = require('express-validator');
 var User = require('../model/User')
-var Product = require('../model/Products')
+var Product = require("../model/Products")
 var bcrypt = require('bcrypt')
 
 
