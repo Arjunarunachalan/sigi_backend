@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 var User = require('../../model/User')
 var bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+var verifyJwt=require('../../middelware/JwtMiddleware')
 
 
 
