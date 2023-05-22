@@ -50,9 +50,9 @@ async function (req, res, next) {
 });
 
 router.post('/login',
-body("email").not().isEmpty().withMessage("Email is required")
-.isEmail().withMessage("Check your email address"),
-body("password").not().isEmpty().withMessage("Password is required"),
+  body("email").not().isEmpty().withMessage("Email is required")
+  .isEmail().withMessage("Check your email address"),
+  body("password").not().isEmpty().withMessage("Password is required"),
 async function (req, res, next) {
   const { errors } = validationResult(req);
     if (errors.length>0) {
@@ -68,12 +68,7 @@ async function (req, res, next) {
       bcrypt.compare(password,user.password).then((response)=>{
        
         if(response){
-          const token = jwt.sign(
-            {user} ,
-            process.env.JWT_TOKEN,
-            {
-              expiresIn: "2h",
-            }
+          const token = jwt.sign({user} ,process.env.JWT_TOKEN,{ expiresIn: "2h",}
           );
 
           return res.status(200).json({ token,message: `${email} logged in succussfully` });
@@ -93,12 +88,13 @@ async function (req, res, next) {
 
 
 
-//  Change Password
+ //Change Password
 router.post('/change-password',
 body("oldPassword").not().isEmpty().withMessage("Old password is required").isLength({ min: 6, max: 12 }),
 body("newPassword").not().isEmpty().withMessage("New password is required").isLength({ min: 6, max: 12 }),
-body("confirmPassword").not().isEmpty().withMessage("Confirm password is required").isLength({ min: 6, max: 12 })
-,async(req,res,next)=>{
+body("confirmPassword").not().isEmpty().withMessage("Confirm password is required").isLength({ min: 6, max: 12 }),
+async(req,res,next)=>{
+  console.log(req.body);
 
     // express validator response
     const { errors } = validationResult(req);
@@ -107,12 +103,25 @@ body("confirmPassword").not().isEmpty().withMessage("Confirm password is require
     }
     // express validator response
 
-    const { oldPassword } = req.body
-    const { authorization } = req.headers
-    let token = authorization.split(" ")[1]
-    let docode = jwt.verify(token, process.env.JWT_TOKEN);
-    console.log(docode);
 
+    const {oldPassword,newPassword,confirmPassword } = req.body
+    let token  =req.headers.authentication
+    const secretKey = process.env.JWT_TOKEN;
+    let docode = jwt.verify(token, secretKey);
+    console.log(docode);
+    console.log("password",docode.user.password);
+    const userPassword = docode.user.password
+    const confirm = await bcrypt.compare(oldPassword,userPassword)
+    console.log(confirm);
+    console.log(User)
+
+    if(confirm){
+      return res.status(200).json({ token,message: `old and new password are same` });
+
+    }else{
+      return res.send(403).json({token,message:"password are incorrect"})
+    }
+    
 })
 //  Change Password
 
