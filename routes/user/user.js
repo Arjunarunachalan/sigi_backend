@@ -4,7 +4,7 @@ const { body, validationResult } = require('express-validator');
 var User = require('../../model/User')
 var bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-var verifyJwt=require('../../middelware/JwtMiddleware')
+var verifyJwt = require('../../middelware/JwtMiddleware');
 
 
 
@@ -51,10 +51,10 @@ async function (req, res, next) {
 });
 
 router.post('/login',
-body("email").not().isEmpty().withMessage("Email is required")
-.isEmail().withMessage("Check your email address"),
-body("password").not().isEmpty().withMessage("Password is required"),
-async function (req, res, next) {
+  body("email").not().isEmpty().withMessage("Email is required")
+  .isEmail().withMessage("Check your email address"),
+  body("password").not().isEmpty().withMessage("Password is required"),
+ async function (req, res, next) {
   const { errors } = validationResult(req);
     if (errors.length>0) {
       return res.status(400).json({ errors}) ;
@@ -69,12 +69,7 @@ async function (req, res, next) {
       bcrypt.compare(password,user.password).then((response)=>{
        
         if(response){
-          const token = jwt.sign(
-            {user} ,
-            process.env.JWT_TOKEN,
-            {
-              expiresIn: "2h",
-            }
+          const token = jwt.sign({user} ,process.env.JWT_TOKEN,{ expiresIn: "2h",}
           );
 
           return res.status(200).json({ token,message: `${email} logged in succussfully` });
@@ -94,12 +89,13 @@ async function (req, res, next) {
 
 
 
-//  Change Password
-router.post('/change-password',
+ //Change Password
+router.post('/change-password',verifyJwt,
 body("oldPassword").not().isEmpty().withMessage("Old password is required").isLength({ min: 6, max: 12 }),
 body("newPassword").not().isEmpty().withMessage("New password is required").isLength({ min: 6, max: 12 }),
-body("confirmPassword").not().isEmpty().withMessage("Confirm password is required").isLength({ min: 6, max: 12 })
-,async(req,res,next)=>{
+body("confirmPassword").not().isEmpty().withMessage("Confirm password is required").isLength({ min: 6, max: 12 }),
+async(req,res,next)=>{
+
 
     // express validator response
     const { errors } = validationResult(req);
@@ -108,12 +104,29 @@ body("confirmPassword").not().isEmpty().withMessage("Confirm password is require
     }
     // express validator response
 
-    const { oldPassword } = req.body
-    const { authorization } = req.headers
-    let token = authorization.split(" ")[1]
-    let docode = jwt.verify(token, process.env.JWT_TOKEN);
-    console.log(docode);
 
+    const {oldPassword,newPassword,confirmPassword } = req.body
+    const {email} = req.user
+    const user = await User.findOne({email})
+    let hashedPassword = await bcrypt.hash(newPassword, 10);
+    console.log("hashedpassword:",hashedPassword);
+    console.log("user:",user);
+
+    if(!user){
+      return res.status(401).json({ message: "User with the email is not found"})
+    }
+    const result = await bcrypt.compare(oldPassword, user.password);
+    if(!result){
+      return res.status(400).json({ message: "Password is incorrect"})
+    }else{
+      await user.updateOne({password:hashedPassword})
+       console.log(user);
+      return res.status(200).json({message:"sucesss"})
+    }
+    
+   
+
+    
 })
 //  Change Password
 

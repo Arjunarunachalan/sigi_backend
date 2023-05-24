@@ -2,7 +2,7 @@ var express = require('express');
 const Products = require('../../model/Products');
 const { body, validationResult } = require('express-validator');
 const { verifyToken } = require('../../utils/middleware');
-var router = express.Router();
+  var router = express.Router();
 
 router.post('/list', verifyToken,
 body("name").not().isEmpty().withMessage("Name is required"),
