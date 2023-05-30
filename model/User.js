@@ -11,6 +11,7 @@ const userSchema = new Schema({
     addressLine2:String,
     city:String,
     state:String,
+    otp:Number,
     email:{ type: String, unique: true,required:true },
     password:String,
     phone:Number,

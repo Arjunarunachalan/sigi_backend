@@ -4,10 +4,11 @@ const { body, validationResult } = require('express-validator');
 var User = require('../../model/User')
 var bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const nodeMailer = require('nodemailer');
 var verifyJwt = require('../../middelware/JwtMiddleware');
 
 
-
+// signup
 router.post('/signup', 
 body("name").not().isEmpty().withMessage("Name is required"),
 body("email")
@@ -49,7 +50,7 @@ async function (req, res, next) {
           .json({ message: `Internal server error ${error}` });
       });
 });
-
+// login
 router.post('/login',
   body("email").not().isEmpty().withMessage("Email is required")
   .isEmail().withMessage("Check your email address"),
@@ -85,10 +86,6 @@ router.post('/login',
     }
   }
 )
-
-
-
-
  //Change Password
 router.post('/change-password',verifyJwt,
 body("oldPassword").not().isEmpty().withMessage("Old password is required").isLength({ min: 6, max: 12 }),
@@ -117,7 +114,7 @@ async(req,res,next)=>{
     }
     const result = await bcrypt.compare(oldPassword, user.password);
     if(!result){
-      return res.status(400).json({ message: "Password is incorrect"})
+      return res.status(401).json({ message: "Password is incorrect"})
     }else{
       await user.updateOne({password:hashedPassword})
        console.log(user);
@@ -128,7 +125,61 @@ async(req,res,next)=>{
 
     
 })
-//  Change Password
+// Forgot Password
+router.post('/forgot-password',async (req,res,next)=>{
+const Email = req.body.value
+const LoginUser = await User.findOne({email:Email})
+//console.log(Email);
+//console.log("Loginuser",LoginUser);
+var min = 1000;
+var max = 9999;
+var OTP =  Math.floor(Math.random() * (max - min + 1)) + min;
+console.log("OTP",OTP);
+//console.log( "randaom number",OTP);
+if(LoginUser){
+   await LoginUser.updateOne({otp:OTP})
+  //console.log(LoginUser)
+const html =`<h4>Sigi OTP is <h1>${LoginUser.otp}<h1> </h4>`;
+console.log(LoginUser)
+let transporter = nodeMailer.createTransport({
+  service: 'gmail',
+  secure:false,
+  auth: {
+      user: 'sigishoping@gmail.com',
+      pass: "ekmctnwqtefepvwq"
+  }
+});
+const mailOptions = {
+  from: 'sigishoping@gmail.com',
+  to: 'shifaskottayi@gmail.com',
+  subject: 'Test Email',
+  html:html,
+  text: 'This is a test email sent using Nodemailer.'
+};
+
+transporter.sendMail(mailOptions, (error, info) => {
+  if (error) {
+    console.log('Error:', error);
+  } else {
+    console.log('Email sent:', info.response);
+  }
+});
+ 
+return res.status(200).json({message:"OTP sended sucessfully" })
+
+}else if(!LoginUser){
+
+  return res.status(401).json({message:"User with this email is not founded"})
+}
+
+
+
+})
+
+router.post('/forgot-password/authentication', async( req, res, next)=>{
+
+   const OTP = req.body.OTP
+})
 
 
 module.exports = router;
